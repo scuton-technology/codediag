@@ -1,6 +1,6 @@
 {
   "name": "codediag",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Diagnose your code before you ship. Automated project health scanner for NestJS and beyond.",
   "author": "Scuton Technology <hello@scuton.com> (https://scuton.com)",
   "license": "MIT",
