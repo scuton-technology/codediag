@@ -20,9 +20,19 @@ export async function analyzeDependencies(projectPath: string): Promise<Analyzer
     return { name: "Dependencies", score: 0, issues: [{ severity: "critical", rule: "invalid-package-json", message: "Cannot parse package.json" }], summary: "Invalid package.json" };
   }
 
-  // 1. Lock file
+  // 1. Lock file — check projectPath and up to 3 parent directories (monorepo support)
   checksRun++;
-  const hasLock = existsSync(join(projectPath, "package-lock.json")) || existsSync(join(projectPath, "pnpm-lock.yaml")) || existsSync(join(projectPath, "yarn.lock"));
+  const lockFileNames = ["package-lock.json", "pnpm-lock.yaml", "yarn.lock"];
+  let hasLock = false;
+  {
+    let dir = projectPath;
+    for (let i = 0; i <= 3; i++) {
+      if (lockFileNames.some((f) => existsSync(join(dir, f)))) { hasLock = true; break; }
+      const parent = join(dir, "..");
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
   if (hasLock) { checksPassed++; } else {
     issues.push({ severity: "critical", rule: "no-lock-file", message: "No lock file — builds not reproducible", fix: "Run npm install to generate package-lock.json" });
   }
@@ -30,7 +40,7 @@ export async function analyzeDependencies(projectPath: string): Promise<Analyzer
   // 2. npm audit
   checksRun++;
   try {
-    const out = execSync("npm audit --json 2>/dev/null", { cwd: projectPath, timeout: 30000, encoding: "utf-8" });
+    const out = execSync("npm audit --json", { cwd: projectPath, timeout: 30000, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] });
     const audit = JSON.parse(out);
     const vulns = audit.metadata?.vulnerabilities || {};
     const critical = vulns.critical || 0;

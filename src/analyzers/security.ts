@@ -16,18 +16,30 @@ export async function analyzeSecurity(projectPath: string): Promise<AnalyzerResu
   let checksRun = 0;
   let checksPassed = 0;
 
-  // 1. .gitignore has .env
+  // 1. .gitignore has .env — check projectPath and up to 3 parent directories (monorepo support)
   checksRun++;
-  const gitignorePath = join(projectPath, ".gitignore");
-  if (existsSync(gitignorePath)) {
-    const content = readFileSync(gitignorePath, "utf-8");
-    if (content.includes(".env")) {
-      checksPassed++;
-    } else {
-      issues.push({ severity: "critical", rule: "env-not-gitignored", message: ".env is not in .gitignore — secrets may be committed", file: ".gitignore", fix: "Add .env to your .gitignore" });
+  {
+    let foundGitignore = false;
+    let dir = projectPath;
+    for (let i = 0; i <= 3; i++) {
+      const gitignorePath = join(dir, ".gitignore");
+      if (existsSync(gitignorePath)) {
+        foundGitignore = true;
+        const content = readFileSync(gitignorePath, "utf-8");
+        if (content.includes(".env")) {
+          checksPassed++;
+        } else {
+          issues.push({ severity: "critical", rule: "env-not-gitignored", message: ".env is not in .gitignore — secrets may be committed", file: gitignorePath, fix: "Add .env to your .gitignore" });
+        }
+        break;
+      }
+      const parent = join(dir, "..");
+      if (parent === dir) break;
+      dir = parent;
     }
-  } else {
-    issues.push({ severity: "critical", rule: "no-gitignore", message: "No .gitignore file found", fix: "Create .gitignore with .env, node_modules, dist" });
+    if (!foundGitignore) {
+      issues.push({ severity: "critical", rule: "no-gitignore", message: "No .gitignore file found", fix: "Create .gitignore with .env, node_modules, dist" });
+    }
   }
 
   // 2. Hardcoded secrets
