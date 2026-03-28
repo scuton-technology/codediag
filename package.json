@@ -1,0 +1,61 @@
+{
+  "name": "codediag",
+  "version": "0.1.0",
+  "description": "Diagnose your code before you ship. Automated project health scanner for NestJS and beyond.",
+  "author": "Scuton Technology <hello@scuton.com> (https://scuton.com)",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "codediag": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scuton-technology/codediag.git"
+  },
+  "homepage": "https://codediag.dev",
+  "bugs": {
+    "url": "https://github.com/scuton-technology/codediag/issues"
+  },
+  "keywords": [
+    "code-quality",
+    "diagnostics",
+    "nestjs",
+    "security",
+    "audit",
+    "cli",
+    "health-check",
+    "static-analysis",
+    "devtools",
+    "testing"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "glob": "^11.0.0",
+    "ora": "^8.1.0",
+    "ts-morph": "^24.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0"
+  }
+}
